@@ -118,7 +118,7 @@ Nous pouvons maintenant joindre les données économiques aux réponses des forc
 ```{r}
 data <- left_join(answers, revenues_poverty, by = c("dept_nb" = "CODGEO"))
 data
-write_csv(data, "Données fusionnées.csv")
+write_csv(data, "Données fusionnées.csv", na = "")
 ```
 
 Nous pourrions analyser le lien entre la pauvreté du lieu d’exercice et l’âge souhaité des mineurs (surtout pauvreté des plus jeunes) ; le manque d’effectif ; le temps de formation ; le nombre de jours supplémentaires impayés et le manque d’effectif ; l’appréciation de la mobilité ; la volonté d’un cadre plus sûr ; la forfaitisation de sanctions…
