@@ -1,0 +1,74 @@
+Nom original,Nouveau nom
+réponse,rep
+Date de lancement,d_start
+Date de la dernière action,d_end
+Vous êtes :,you
+Vous êtes : [Autre],you_other
+"Vous êtes dans la police ou la gendarmerie nationales, vous exercez des fonctions : ",fct
+"Vous êtes dans la police ou la gendarmerie nationales, vous exercez des fonctions :  [Autre]",fct_other
+Vous appartenez à :,belong
+Vous appartenez à : [Autre],belong_other
+Dans quel département travaillez-vous ?,dept
+Travaillez-vous dans :,in
+"Listez deux tâches que vous effectuez aujourd’hui et que vous jugez indues ou qui, selon vous, devraient être effectuées par d’autres personnels :  [Première tâche]",task_1
+"Listez deux tâches que vous effectuez aujourd’hui et que vous jugez indues ou qui, selon vous, devraient être effectuées par d’autres personnels :  [Seconde tâche]",task_2
+Quelles sont les améliorations que vous avez constatées dans la simplification des procédures ?,impr
+Réponse pénale : Pensez-vous que la forfaitisation de la sanction de nouveaux délits pourrait être efficace ?,penal
+"Si oui, lesquels ? [Saisissez ici votre texte]",penal_1
+"Si oui, lesquels ? [Saisissez ici votre texte]",penal_2
+"Si oui, lesquels ? [Saisissez ici votre texte]",penal_3
+"Mineurs : A partir de quel âge selon vous, un mineur devrait, selon vous, être traité comme un majeur par la justice ?",agemaj
+"Mineurs : A partir de quel âge selon vous, un mineur devrait, selon vous, être traité comme un majeur par la justice ? [Autre]",agemaj_other
+Avez-vous déjà été blessé au cours de vos missions ?,hurt
+"Si vous avez déjà été blessé, précisez l’accompagnement fourni par l’administration.",hurt_then
+Protection fonctionnelle : Avez-vous bénéficié de la protection fonctionnelle ? ,prot
+La procédure de la protection fonctionnelle vous parait-elle adaptée ?,prot_adeq
+Pensez-vous qu’il faudrait l’étendre aux fautes non intentionnelles ?,prot_ext
+Formation initiale : la formation initiale vous parait-elle adéquate ?,train
+Formation aux techniques du maintien de l’ordre : Pensez-vous qu’une formation aux techniques du maintien de l’ordre serait  nécessaire  pour tous les membres des forces de l’ordre indépendamment de leurs fonctions actuelles ?,train_ext
+Le temps que vous consacrez à vous former vous paraît-il suffisant ?,train_suff
+De combien de jours de formation avez-vous bénéficié en : [2016 (en jours)],train_days_2016
+De combien de jours de formation avez-vous bénéficié en : [2017 (en jours)],train_days_2017
+De combien de jours de formation avez-vous bénéficié en : [2018 (en jours)],train_days_2018
+"Avez-vous perdu des habilitations dans les deux dernières années, faute de stages en quantité suffisante ou de disponibilité ? [Saisissez votre texte ici]",hab_1
+"Avez-vous perdu des habilitations dans les deux dernières années, faute de stages en quantité suffisante ou de disponibilité ? [Saisissez votre texte ici]",hab_2
+"Avez-vous perdu des habilitations dans les deux dernières années, faute de stages en quantité suffisante ou de disponibilité ? [Saisissez votre texte ici]",hab_3
+Entraînement au tir : Avez-vous pu remplir les obligations réglementaires d’entrainement au tir ?,train_shoot
+"Si vous considérez que des équipements individuels vous sont nécessaires et que vous n’en disposez pas, quels sont-ils ? [Saisissez ici votre texte]",eq_miss_1
+"Si vous considérez que des équipements individuels vous sont nécessaires et que vous n’en disposez pas, quels sont-ils ? [Saisissez ici votre texte]",eq_miss_2
+"Si vous considérez que des équipements individuels vous sont nécessaires et que vous n’en disposez pas, quels sont-ils ? [Saisissez ici votre texte]",eq_miss_3
+Quelle est la part approximative de votre équipement individuel que vous avez acheté vous-même ?,eq_pers
+Classez dans l’ordre de priorité les raisons qui ont justifié votre choix de vous auto-équiper : [Classement 1],eq_pers_reas_1
+Classez dans l’ordre de priorité les raisons qui ont justifié votre choix de vous auto-équiper : [Classement 2],eq_pers_reas_2
+Classez dans l’ordre de priorité les raisons qui ont justifié votre choix de vous auto-équiper : [Classement 3],eq_pers_reas_3
+Jugez-vous que les véhicules dont vous disposez pour l’exercice de vos missions sont :,veh
+Quelles sont les adaptations que vous jugeriez nécessaires :,veh_ad
+Informatique : Jugez-vous que les équipements informatiques dont vous disposez pour l’exercice de vos missions sont :,info
+Êtes-vous régulièrement confronté à l’indisponibilité de matériels communs ou de locaux ?,indisp
+Jugez-vous opportun de généraliser l’équipement en caméra piéton ?,cam
+Comment jugez-vous l’état de votre lieu de travail ?,place
+Comment jugez-vous l’état de votre logement quand celui-ci vous est fourni par l’administration ?,liv
+"Lorsque des acquisitions ou des rénovations sont conduites, sont-elles :",renov
+Trouvez-vous la procédure suffisamment décentralisée en matière d’entretien des bâtiments ?,renov_dec
+Pensez-vous que la concession de logement pour nécessité absolue de service devrait  être adaptée pour les agents qui disposent d’une résidence à proximité de leur domicile ?,liv_prox
+Vous sentez-vous assez nombreux pour effectuer les missions qui vous sont confiées ?,num
+"Si non, à combien évaluez-vous le manque d’effectifs ?",num_miss
+À quelle fréquence avez-vous un week-end de congés ?,hol
+Quels sont les aspects les plus positifs de votre rythme de travail actuel ?,rhyt_pos
+Quels sont les aspects les plus négatifs de votre rythme de travail actuel ?,rhyt_neg
+"Êtes-vous favorable à la généralisation du cycle 2 / 2 / 3 / 2 / 3 / 2, dit « vacation forte » ?",vac
+Combien d’heures supplémentaires non compensées avez-vous accumulées à ce jour ?,supp
+Quelles sont les raisons qui vous ont conduit à vous engager dans les forces de l’ordre ?,motiv
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 1],fidel_1
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 2],fidel_2
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 3],fidel_3
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 4],fidel_4
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 5],fidel_5
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 6],fidel_6
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 7],fidel_7
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 8],fidel_8
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 9],fidel_9
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 10],fidel_10
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 11],fidel_11
+Classez par ordre de priorité les leviers de fidélisation suivants : [Classement 12],fidel_12
+Avez-vous des remarques complémentaires ?  ,rmq
