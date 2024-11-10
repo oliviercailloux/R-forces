@@ -61,31 +61,11 @@ if (!file.exists(zip_file_name)) {
   downloaded_return <- download.file(filosofi_url, zip_file_name, mode = "wb")
   stopifnot(identical(downloaded_return, 0L))
 }
-```
-Ouvrons le zip et extrayons les fichiers cc_filosofi_2019_DEP.csv et meta_cc_filosofi_2019_DEP.csv.
-```{r}
+
 to_extract <- c("cc_filosofi_2019_DEP.csv", "meta_cc_filosofi_2019_DEP.csv")
 if (!all(file.exists(to_extract))) {
   unzip(zip_file_name, files = to_extract)
 }
-```
-
-Tentons maintenant de télécharger le zip en mémoire et d’en extraire les fichiers.
-```{r}
-# insee_response <- httr::GET(filosofi_url)
-# stopifnot(insee_response$status_code == 200)
-# zip_content <- httr::content(insee_response, as = "raw")
-# zip_content <- unzip::unzip(zip_content, list = TRUE)
-# to_extract <- c("cc_filosofi_2019_DEP.csv", "meta_cc_filosofi_2019_DEP.csv")
-# stopifnot(all(to_extract %in% zip_content$Name))
-# zip_content <- unzip::unzip(zip_content, files = to_extract)
-```
-Il nous faut maintenant écrire ces deux fichiers sur le disque.
-```{r}
-# for (file_name in to_extract) {
-#   file_content <- unzip::unzip(zip_content, files = file_name)
-#   writeBin(file_content, file_name)
-# }
 ```
 
 # Lecture des données
@@ -108,3 +88,36 @@ stopifnot(answers |> filter(rep == 9) |> pull(train_days_2017) == 2.5)
 stopifnot(nrow(answers) == 13735)
 ```
 
+## Revenus et pauvreté
+Lisons maintenant les données économiques.
+```{r}
+revenues_poverty <- read_delim("cc_filosofi_2019_DEP.csv",
+  delim = ";", locale = locale(decimal_mark = ","),
+  show_col_types = FALSE
+)
+revenues_poverty
+```
+
+Vérifions que le revenu médian et le taux de pauvreté de l’Ain sont ceux indiqués [sur le site](https://www.insee.fr/fr/statistiques/6436484?sommaire=6036904#tableau-figure1_radio1).
+```{r}
+ain <- revenues_poverty |> filter(CODGEO == "01")
+stopifnot(ain |> pull(MED19) == 23490)
+stopifnot(ain |> pull(TP6019) == 10.7)
+```
+
+# Croisement des données
+Extrayons le premier mot de la colonne `dept` pour obtenir le code de département (on vérifie avec une réponse donnée que la conversion a fonctionné).
+Notons que les départements corses ne s’encodent pas comme des nombres, donc ce code doit être de type chaine de caractères.
+```{r}
+stopifnot(answers |> filter(rep == 3) |> pull(dept) == "08 - ARDENNES")
+answers <- mutate(answers, dept_nb = str_extract(dept, "^[0-9AB]+"), .after = dept)
+stopifnot(answers |> filter(rep == 3) |> pull(dept_nb) == "08")
+```
+
+Nous pouvons maintenant joindre les données économiques aux réponses des forces de sécurité.
+```{r}
+data <- left_join(answers, revenues_poverty, by = c("dept_nb" = "CODGEO"))
+data
+```
+
+Nous pourrions analyser le lien entre la pauvreté du lieu d’exercice et l’âge souhaité des mineurs (surtout pauvreté des plus jeunes) ; le manque d’effectif ; le temps de formation ; le nombre de jours supplémentaires impayés et le manque d’effectif ; l’appréciation de la mobilité ; la volonté d’un cadre plus sûr ; la forfaitisation de sanctions…
