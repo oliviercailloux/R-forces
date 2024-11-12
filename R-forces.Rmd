@@ -3,6 +3,7 @@ title: "Le projet R forces"
 author:  - "Méziane Cherif"
   - "Olivier Cailloux"
 output: pdf_document
+les bonbons c'est pas très bon 
 
 
 ---
