@@ -1,9 +1,10 @@
 ---
 title: "Le projet R forces"
-author: 
-  - "Meziane Cherif"
+author:  - "Méziane Cherif"
   - "Olivier Cailloux"
 output: pdf_document
+
+
 ---
 
 # Contexte
