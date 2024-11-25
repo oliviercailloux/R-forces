@@ -105,15 +105,23 @@ stopifnot(ain |> pull(MED19) == 23490)
 stopifnot(ain |> pull(TP6019) == 10.7)
 ```
 
-# Croisement des données
+# Traitement des données
 Extrayons le premier mot de la colonne `dept` pour obtenir le code de département (on vérifie avec une réponse donnée que la conversion a fonctionné).
 Notons que les départements corses ne s’encodent pas comme des nombres, donc ce code doit être de type chaine de caractères.
+
+Transformons également l’âge donné en nombre entier.
+
 ```{r}
 stopifnot(answers |> filter(rep == 3) |> pull(dept) == "08 - ARDENNES")
 answers <- mutate(answers, dept_nb = str_extract(dept, "^[0-9AB]+"), .after = dept)
 stopifnot(answers |> filter(rep == 3) |> pull(dept_nb) == "08")
+
+answers <- answers |> filter(!is.na(agemaj)) |> filter(agemaj != "Autre")
+stopifnot(all(str_detect(answers$agemaj, "^[0-9]+ ans$")))
+answers <- mutate(answers, agemaj = as.integer(str_extract(agemaj, "^[0-9]+")))
 ```
 
+# Croisement des données
 Nous pouvons maintenant joindre les données économiques aux réponses des forces de sécurité.
 ```{r}
 data <- left_join(answers, revenues_poverty, by = c("dept_nb" = "CODGEO"))
@@ -121,4 +129,12 @@ data
 write_csv(data, "Données fusionnées.csv", na = "")
 ```
 
+# Idées (brouillon)
 Nous pourrions analyser le lien entre la pauvreté du lieu d’exercice et l’âge souhaité des mineurs (surtout pauvreté des plus jeunes) ; le manque d’effectif ; le temps de formation ; le nombre de jours supplémentaires impayés et le manque d’effectif ; l’appréciation de la mobilité ; la volonté d’un cadre plus sûr ; la forfaitisation de sanctions…
+
+# Sélection
+Considérons le taux de pauvreté dans leur département et l’âge souhaité pour traitement comme un majeur. On ne retient en outre que les enregistrements où ces deux variables sont renseignées.
+
+```{r}
+subset <- data |> select("TP6019", "agemaj") |> drop_na()
+```
