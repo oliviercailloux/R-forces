@@ -137,3 +137,86 @@ Considérons le taux de pauvreté dans leur département et l’âge souhaité p
 ```{r}
 subset <- data |> select("TP6019", "agemaj") |> drop_na()
 ```
+# Décrire les variables retenues
+# Variable: Age de la majorité (agemaj)
+agemaj <- data$agemaj
+
+# Tableau de fréquences pour l'âge de la majorité
+table_agemaj <- table(agemaj)
+print(table_agemaj)
+
+# Diagramme en barres pour l'âge de la majorité
+barplot(table_agemaj, main = "Distribution de l'âge de la majorité", xlab = "Âge", ylab = "Fréquence", col = "lightblue")
+
+# Variable: Revenu disponible (revenu_disponible)
+# Histogramme pour le revenu disponible
+hist(revenu_disponible, main = "Distribution du revenu disponible", xlab = "Revenu disponible", ylab = "Fréquence", col = "lightgreen", breaks = 20)
+
+# Variable: Catégorie (policier ou armée)
+categorie <- data$categorie
+
+# Supprimer les valeurs manquantes dans categorie
+categorie <- categorie[!is.na(categorie)]
+categorie <- as.factor(categorie)  # Assurez-vous que la variable est un facteur
+
+# Tableau de fréquences pour la catégorie
+table_categorie <- table(categorie)
+print(table_categorie) 
+
+# Vérifier s'il y a au moins deux catégories pour éviter les erreurs dans le graphique
+if (length(table_categorie) >= 2) {
+  # Diagramme en secteurs pour la catégorie
+  pie(table_categorie, main = "Répartition des catégories (policier ou armée)", col = c("lightcoral", "lightyellow"))
+} else {
+  cat("Impossible de créer un diagramme en secteurs : moins de deux catégories présentes.\n")
+
+
+
+#estimation de l'age moyen requis pour être considéré comme un majeur 
+
+
+x<-mean(subset$agemaj)
+x
+
+scor <- sd(subset$agemaj)
+scor
+n<-length(subset$agemaj)
+n
+
+a1 <- x - qnorm(0.975)*(scor/sqrt(n))
+a2 <- x + qnorm(0.975)*(scor/sqrt(n))
+c(a1,a2)
+
+b1 <- x - qnorm(0.95)*(scor/sqrt(n))
+b2 <- x + qnorm(0.95)*(scor/sqrt(n))
+c(b1,b2)
+
+
+
+revenu_disponible <- data$RD19  
+
+mu_0 <- 3.5 
+
+t_test_5 <- t.test(revenu_disponible, mu = mu_0, conf.level = 0.95)
+
+print(t_test_5)
+
+if (t_test_5$p.value < 0.05) {
+  cat("Au seuil de 5%, nous rejetons l'hypothèse nulle : la moyenne du revenu disponible est significativement différente de 3.5.\n")
+} else {
+  cat("Au seuil de 5%, nous ne pouvons pas rejeter l'hypothèse nulle : la moyenne du revenu disponible n'est pas significativement différente de 3.5.\n")
+}
+
+t_test_10 <- t.test(revenu_disponible, mu = mu_0, conf.level = 0.90)
+
+print(t_test_10)
+
+# Commentaire sur le résultat au seuil de 10%
+if (t_test_10$p.value < 0.10) {
+  cat("Au seuil de 10%, nous rejetons l'hypothèse nulle : la moyenne du revenu disponible est significativement différente de 3.5.\n")
+} else {
+  cat("Au seuil de 10%, nous ne pouvons pas rejeter l'hypothèse nulle : la moyenne du revenu disponible n'est pas significativement différente de 3.5.\n")
+}
+
+
+
