@@ -258,11 +258,3 @@ stopifnot(ct$p.value - (1 - pchisq(unname(ct$statistic), ct$parameter)) < 1e-10)
 ct$p.value |> format(digits = 2)
 ```
 On peut donc confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
-
-# Annexe
-```{r}
-# show relationship with age
-subset |> ggplot(aes(x = povs, y = agemaj)) +
-  geom_point() +
-  geom_smooth(method = "lm")
-```
