@@ -251,7 +251,7 @@ ct <- chisq.test(table(povs_bins, ages_bins))
 ct$expected |> round(2)
 ```
 
-La probabilité qu’une $χ^2$ à `r ct$parameter` degrés de liberté soit aussi extrême que celle observée est la suivante. Notons qu’on n’utilise pas la p-value fournie par R, car celle-ci utilise un nombre de degrés de liberté non corrigés par nos estimations.
+La probabilité qu’une $χ^2$ à `r ct$parameter` degrés de liberté soit aussi extrême que celle observée est la suivante.
 
 ```{r}
 stopifnot(ct$p.value - (1 - pchisq(unname(ct$statistic), ct$parameter)) < 1e-10)
