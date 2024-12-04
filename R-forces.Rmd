@@ -8,6 +8,7 @@ header-includes:
   - \usepackage{newunicodechar}
   - \newunicodechar{μ}{\mu}
   - \newunicodechar{σ}{\sigma}
+  - \newunicodechar{χ}{\chi}
   - \newunicodechar{∈}{\in}
   - \newunicodechar{≈}{\approx}
 ---
@@ -30,7 +31,6 @@ Chargeons quelques packages utiles.
 library(conflicted)
 conflicts_prefer(dplyr::filter)
 library(tidyverse)
-library(truncnorm)
 ```
 
 Téléchargeons les réponses des forces de sécurité, ou vérifions leur conformité si elles sont déjà présentes à l’aide du hash MD5 indiqué sur le site sus-mentionné.
