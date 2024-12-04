@@ -1,8 +1,15 @@
 ---
 title: "Le projet R forces"
-author:  - "Méziane Cherif"
+author:
+  - "Méziane Cherif"
   - "Olivier Cailloux"
 output: pdf_document
+header-includes:
+  - \usepackage{newunicodechar}
+  - \newunicodechar{μ}{\mu}
+  - \newunicodechar{σ}{\sigma}
+  - \newunicodechar{∈}{\in}
+  - \newunicodechar{≈}{\approx}
 ---
 
 # Contexte
@@ -23,6 +30,7 @@ Chargeons quelques packages utiles.
 library(conflicted)
 conflicts_prefer(dplyr::filter)
 library(tidyverse)
+library(truncnorm)
 ```
 
 Téléchargeons les réponses des forces de sécurité, ou vérifions leur conformité si elles sont déjà présentes à l’aide du hash MD5 indiqué sur le site sus-mentionné.
@@ -115,7 +123,9 @@ stopifnot(answers |> filter(rep == 3) |> pull(dept) == "08 - ARDENNES")
 answers <- mutate(answers, dept_nb = str_extract(dept, "^[0-9AB]+"), .after = dept)
 stopifnot(answers |> filter(rep == 3) |> pull(dept_nb) == "08")
 
-answers <- answers |> filter(!is.na(agemaj)) |> filter(agemaj != "Autre")
+answers <- answers |>
+  filter(!is.na(agemaj)) |>
+  filter(agemaj != "Autre")
 stopifnot(all(str_detect(answers$agemaj, "^[0-9]+ ans$")))
 answers <- mutate(answers, agemaj = as.integer(str_extract(agemaj, "^[0-9]+")))
 ```
@@ -132,91 +142,146 @@ write_csv(data, "Données fusionnées.csv", na = "")
 Nous pourrions analyser le lien entre la pauvreté du lieu d’exercice et l’âge souhaité des mineurs (surtout pauvreté des plus jeunes) ; le manque d’effectif ; le temps de formation ; le nombre de jours supplémentaires impayés et le manque d’effectif ; l’appréciation de la mobilité ; la volonté d’un cadre plus sûr ; la forfaitisation de sanctions…
 
 # Sélection
-Considérons le taux de pauvreté dans leur département et l’âge souhaité pour traitement comme un majeur. On ne retient en outre que les enregistrements où ces deux variables sont renseignées.
+Considérons le taux de pauvreté dans leur département et l’âge souhaité pour traitement comme un majeur. On ne retient en outre que les enregistrements où ces variables sont toutes renseignées.
 
 ```{r}
-subset <- data |> select("TP6019", "agemaj") |> drop_na()
+subset <- data |>
+  select("you", "TP6019", "agemaj") |>
+  drop_na()
 ```
-# Décrire les variables retenues
-# Variable: Age de la majorité (agemaj)
-agemaj <- data$agemaj
 
-# Tableau de fréquences pour l'âge de la majorité
-table_agemaj <- table(agemaj)
-print(table_agemaj)
+# Comparaison de sous-groupes
+Les nombres de réponses par types de répondants diffèrent beaucoup. Considérons les deux types de répondants avec le plus de réponses.
+```{r}
+subset |> ggplot(aes(x = you)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+highest_answers_type <- subset |>
+  select("you") |>
+  group_by(you) |>
+  count() |>
+  ungroup() |>
+  slice_max(n, n = 2) |>
+  pull(you)
+highest_answers_type
+indicators_by_type <- subset |>
+  filter(you %in% highest_answers_type) |>
+  select(you, agemaj) |>
+  group_by(you) |>
+  summarise(mu = mean(agemaj), "s’" = sd(agemaj), n = n())
+indicators_by_type
+```
+Soit $X^{(1)}$ la variable aléatoire représentant l’âge souhaité pour traitement comme un majeur pour le premier type de répondant et $X^{(2)}$ pour le second type de répondant. 
+Définissons $\mu_j$ et $\sigma_j$ les moyennes et écart-types de $X^{(j)}$ respectivement ($j \in \{1, 2\}$). 
+Notons $X^{(j)}_i$ les observations correspondantes ($j \in \{1, 2\}$, $i \in \{1, \ldots, n_j\}$). On suppose les $X^{(j)}_i$ indépendantes et identiquement distribuées selon $X^{(j)}$.
 
-# Diagramme en barres pour l'âge de la majorité
-barplot(table_agemaj, main = "Distribution de l'âge de la majorité", xlab = "Âge", ylab = "Fréquence", col = "lightblue")
+Avec l’approximation normale (largement valable vu le nombre de réponses), on a $X^{(j)} \approx \mathcal{N}(μ_j, σ_j^2)$ donc $\overline{X^{(j)}} = \frac{1}{n_j} \sum_{i=1}^{n_j} X^{(j)}_i \approx \mathcal{N}(μ_j, \frac{σ_j^2}{n_j})$ et $\overline{X^{(1)}} - \overline{X^{(2)}} \approx \mathcal{N}(μ_1 - μ_2, \frac{σ_1^2}{n_1} + \frac{σ_2^2}{n_2})$.
 
-# Variable: Revenu disponible (revenu_disponible)
-# Histogramme pour le revenu disponible
-hist(revenu_disponible, main = "Distribution du revenu disponible", xlab = "Revenu disponible", ylab = "Fréquence", col = "lightgreen", breaks = 20)
+Définissons notre hypothèse nulle $H_0$ (que nous tentons de réfuter) comme l’égalité des moyennes : $μ_1 = μ_2$.
+Sous $H_0$, $\frac{\overline{X^{(1)}} - \overline{X^{(2)}}}{\sqrt{\frac{σ_1^2}{n_1} + \frac{σ_2^2}{n_2}}} \approx \mathcal{N}(0, 1)$. Avec le Théorème de Slutsky et de continuité, en notant $S'^{(j)^2}$ la variance empirique corrigée des observations $X^{(j)}_i$ et en définissant $Z = \frac{\overline{X^{(1)}} - \overline{X^{(2)}}}{\sqrt{\frac{S'^{(1)^2}}{n_1} + \frac{S'^{(2)^2}}{n_2}}}$, on obtient $Z \approx \mathcal{N}(0, 1)$.
+Notons $W$ la région critique et $\overline{W}$ son complémentaire.
 
-# Variable: Catégorie (policier ou armée)
-categorie <- data$categorie
+```{r, echo=FALSE}
+rpes <- c(0.05, 0.1)
+rpe1 <- 0.05
+rpe2 <- 0.1
+prints <- paste0("Avec un risque de première espèce à ", rpes * 100, " %, on a $P(Z ∈ W) = ", rpes, " pour \\overline{W} ≈ [", qnorm(rpes / 2) |> round(2), ", ", qnorm(1 - rpes / 2) |> round(2), "]$.")
+```
+- `r prints[1]`
+- `r prints[2]`
 
-# Supprimer les valeurs manquantes dans categorie
-categorie <- categorie[!is.na(categorie)]
-categorie <- as.factor(categorie)  # Assurez-vous que la variable est un facteur
+```{r}
+z <- (indicators_by_type$mu[1] - indicators_by_type$mu[2]) / sqrt(indicators_by_type[["s’"]][1]^2 / indicators_by_type$n[1] + indicators_by_type[["s’"]][2]^2 / indicators_by_type$n[2])
+```
 
-# Tableau de fréquences pour la catégorie
-table_categorie <- table(categorie)
-print(table_categorie) 
+Nous observons $z = `r z |> round(2)`$ et rejettons donc allègrement $H_0$ : les deux moyennes semblent différentes (à un degré de confiance très élevé, p-value de `r (2 * pnorm(-abs(z))) |> format(digits = 2)`).
 
-# Vérifier s'il y a au moins deux catégories pour éviter les erreurs dans le graphique
-if (length(table_categorie) >= 2) {
-  # Diagramme en secteurs pour la catégorie
-  pie(table_categorie, main = "Répartition des catégories (policier ou armée)", col = c("lightcoral", "lightyellow"))
-} else {
-  cat("Impossible de créer un diagramme en secteurs : moins de deux catégories présentes.\n")
+Voyons ce qu’en pense le test de Welsh de R.
+```{r}
+series1 <- subset |>
+  filter(you == highest_answers_type[1]) |>
+  pull(agemaj)
+series2 <- subset |>
+  filter(you == highest_answers_type[2]) |>
+  pull(agemaj)
+t.test(x = series1, y = series2, var.equal = FALSE)
+```
+Ceci confirme nos résultats (bien que le test de Welch n’utilise pas la même distribution approchée que notre approximation par gaussienne comme vu en cours, la différence est extrêmement faible, vu le nombre de nos observations, d’où le fait que la p-value obtenue par R soit du même ordre que la nôtre).
 
+Notons que nous n’avons pas testé l’égalité des variances, nous avons simplement évité de supposer leur égalité, ce qui est plus robuste, ne requiert pas un tel test ([controversé](https://stats.stackexchange.com/a/289455/) dans la littérature), et ne change pas le résultat étant donné que la puissance de notre test est déjà très largement suffisante pour rejeter l’hypothèse nulle.
 
+Nous concluons que les répondants de la police nationale et ceux de la gendarmerie nationale ne semblent pas avoir le même âge souhaité pour traitement comme un majeur. La différence est statistiquement très significative, mais il faut noter que la signification pratique de cette différence est très faible, vu la très faible différence observée (en fait elle est statistiquement significative uniquement grâce à notre très grand nombre d’observations).
 
-#estimation de l'age moyen requis pour être considéré comme un majeur 
+# Lien entre le taux de pauvreté et l’âge souhaité
+Voyons si le taux de pauvreté dans le département est indépendant de l’âge souhaité pour traitement comme un majeur.
 
+Coupons d’abord les deux séries d’observations en classes d’effectifs proches.
+```{r}
+povs <- subset |> pull(TP6019)
+subset |> ggplot(aes(x = povs)) +
+  geom_histogram(binwidth = 1)
+subset |> ggplot(aes(x = agemaj)) +
+  geom_histogram(binwidth = 1)
+povs_bins <- cut_number(povs, n = 10)
+subset |> ggplot(aes(x = povs_bins)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ages <- subset |> pull(agemaj)
+ages_bins <- cut_number(ages, n = 4)
+subset |> ggplot(aes(x = ages_bins)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
-x<-mean(subset$agemaj)
-x
+Tableau de contingence empirique.
+```{r}
+table(povs_bins, ages_bins) |> addmargins()
+```
+Tableau de contingence empirique normalisé par ligne (profils-lignes).
+```{r}
+table(povs_bins, ages_bins) |>
+  prop.table(margin = 1) |>
+  addmargins() |>
+  round(2)
+```
 
-scor <- sd(subset$agemaj)
-scor
-n<-length(subset$agemaj)
-n
+Les fréquences théoriques requièrent une hypothèse de distribution. 
+Nous supposons des distributions normales tronquées.
+Vu les plots ci-dessus, l’approximation uniforme serait très mauvaise, et l’approximation normale semble inadéquate car les variables sont bornées. Pour la variable pauvreté par exemple, la distribution normale avec les paramètres observés (moyenne `r mean(povs) |> round(2)`, écart-type `r sd(povs) |> round(2)`) aurait une valeur importante en zéro (`r pnorm(0, mean(povs), sd(povs)) |> round(4)`).
 
-a1 <- x - qnorm(0.975)*(scor/sqrt(n))
-a2 <- x + qnorm(0.975)*(scor/sqrt(n))
-c(a1,a2)
+Tableau de contingence théorique sous l’hypothèse d’indépendance.
+```{r}
+# povs_distr <- function(q1, q2) pnorm(q2, mean(povs), sd(povs)) - pnorm(q1, mean(povs), sd(povs))
+povs_distr <- function(q1, q2) ptruncnorm(c(q1, q2), mean(povs), sd(povs), a = min(povs), b = max(povs)) |> diff()
+stopifnot(povs_distr(-Inf, 0) == 0)
+# ages_distr <- function(q1, q2) pnorm(q2, mean(ages), sd(ages)) - pnorm(q1, mean(ages), sd(ages))
+ages_distr <- function(q1, q2) ptruncnorm(c(q1, q2), mean(ages), sd(ages), a = min(ages), b = max(ages)) |> diff()
+# Très inélégant, mais pas trouvé mieux en restant dans le raisonnablement simple. Merci à https://stackoverflow.com/a/40665505/.
+povs_endpoints <- unique(as.numeric(unlist(
+  strsplit(gsub("[][(]", "", levels(povs_bins)), ",")
+)))
+# povs_endpoints[1] <- -Inf
+# povs_endpoints[length(povs_endpoints)] <- Inf
+ages_endpoints <- unique(as.numeric(unlist(
+  strsplit(gsub("[][(]", "", levels(ages_bins)), ",")
+)))
+povs_probs <- sapply(1:(length(povs_endpoints) - 1), function(i) povs_distr(povs_endpoints[i], povs_endpoints[i + 1]))
+# povs_probs
+stopifnot(sum(povs_probs) == 1)
+ages_probs <- sapply(1:(length(ages_endpoints) - 1), function(i) ages_distr(ages_endpoints[i], ages_endpoints[i + 1]))
+stopifnot(sum(ages_probs) == 1)
+expected <- outer(povs_probs, ages_probs)
+# expected |> addmargins()
+ct <- chisq.test(table(povs_bins, ages_bins), p = expected)
+pchisq(unname(ct$statistic), df = ct$parameter - 8, lower.tail = FALSE)
+```
 
-b1 <- x - qnorm(0.95)*(scor/sqrt(n))
-b2 <- x + qnorm(0.95)*(scor/sqrt(n))
-c(b1,b2)
+La probabilité qu’une $χ^2$ à `r ct$parameter - 8` degrés de liberté soit aussi extrême que celle observée est de `r pchisq(unname(ct$statistic), df = ct$parameter - 8, lower.tail = FALSE) |> format(digits = 2)`, on peut donc confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
 
-
-
-revenu_disponible <- data$RD19  
-
-mu_0 <- 3.5 
-
-t_test_5 <- t.test(revenu_disponible, mu = mu_0, conf.level = 0.95)
-
-print(t_test_5)
-
-if (t_test_5$p.value < 0.05) {
-  cat("Au seuil de 5%, nous rejetons l'hypothèse nulle : la moyenne du revenu disponible est significativement différente de 3.5.\n")
-} else {
-  cat("Au seuil de 5%, nous ne pouvons pas rejeter l'hypothèse nulle : la moyenne du revenu disponible n'est pas significativement différente de 3.5.\n")
-}
-
-t_test_10 <- t.test(revenu_disponible, mu = mu_0, conf.level = 0.90)
-
-print(t_test_10)
-
-# Commentaire sur le résultat au seuil de 10%
-if (t_test_10$p.value < 0.10) {
-  cat("Au seuil de 10%, nous rejetons l'hypothèse nulle : la moyenne du revenu disponible est significativement différente de 3.5.\n")
-} else {
-  cat("Au seuil de 10%, nous ne pouvons pas rejeter l'hypothèse nulle : la moyenne du revenu disponible n'est pas significativement différente de 3.5.\n")
-}
-
-
-
+# Annexe
+```{r}
+# show relationship with age
+subset |> ggplot(aes(x = povs, y = agemaj)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
