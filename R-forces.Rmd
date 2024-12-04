@@ -245,38 +245,19 @@ table(povs_bins, ages_bins) |>
   round(2)
 ```
 
-Les fréquences théoriques requièrent une hypothèse de distribution. 
-Nous supposons des distributions normales tronquées.
-Vu les plots ci-dessus, l’approximation uniforme serait très mauvaise, et l’approximation normale semble inadéquate car les variables sont bornées. Pour la variable pauvreté par exemple, la distribution normale avec les paramètres observés (moyenne `r mean(povs) |> round(2)`, écart-type `r sd(povs) |> round(2)`) aurait une valeur importante en zéro (`r pnorm(0, mean(povs), sd(povs)) |> round(4)`).
-
 Tableau de contingence théorique sous l’hypothèse d’indépendance.
 ```{r}
-# povs_distr <- function(q1, q2) pnorm(q2, mean(povs), sd(povs)) - pnorm(q1, mean(povs), sd(povs))
-povs_distr <- function(q1, q2) ptruncnorm(c(q1, q2), mean(povs), sd(povs), a = min(povs), b = max(povs)) |> diff()
-stopifnot(povs_distr(-Inf, 0) == 0)
-# ages_distr <- function(q1, q2) pnorm(q2, mean(ages), sd(ages)) - pnorm(q1, mean(ages), sd(ages))
-ages_distr <- function(q1, q2) ptruncnorm(c(q1, q2), mean(ages), sd(ages), a = min(ages), b = max(ages)) |> diff()
-# Très inélégant, mais pas trouvé mieux en restant dans le raisonnablement simple. Merci à https://stackoverflow.com/a/40665505/.
-povs_endpoints <- unique(as.numeric(unlist(
-  strsplit(gsub("[][(]", "", levels(povs_bins)), ",")
-)))
-# povs_endpoints[1] <- -Inf
-# povs_endpoints[length(povs_endpoints)] <- Inf
-ages_endpoints <- unique(as.numeric(unlist(
-  strsplit(gsub("[][(]", "", levels(ages_bins)), ",")
-)))
-povs_probs <- sapply(1:(length(povs_endpoints) - 1), function(i) povs_distr(povs_endpoints[i], povs_endpoints[i + 1]))
-# povs_probs
-stopifnot(sum(povs_probs) == 1)
-ages_probs <- sapply(1:(length(ages_endpoints) - 1), function(i) ages_distr(ages_endpoints[i], ages_endpoints[i + 1]))
-stopifnot(sum(ages_probs) == 1)
-expected <- outer(povs_probs, ages_probs)
-# expected |> addmargins()
-ct <- chisq.test(table(povs_bins, ages_bins), p = expected)
-pchisq(unname(ct$statistic), df = ct$parameter - 8, lower.tail = FALSE)
+ct <- chisq.test(table(povs_bins, ages_bins))
+ct$expected |> round(2)
 ```
 
-La probabilité qu’une $χ^2$ à `r ct$parameter - 8` degrés de liberté soit aussi extrême que celle observée est de `r pchisq(unname(ct$statistic), df = ct$parameter - 8, lower.tail = FALSE) |> format(digits = 2)`, on peut donc confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
+La probabilité qu’une $χ^2$ à `r ct$parameter` degrés de liberté soit aussi extrême que celle observée est la suivante. Notons qu’on n’utilise pas la p-value fournie par R, car celle-ci utilise un nombre de degrés de liberté non corrigés par nos estimations.
+
+```{r}
+stopifnot(ct$p.value - (1 - pchisq(unname(ct$statistic), ct$parameter)) < 1e-10)
+ct$p.value |> format(digits = 2)
+```
+On peut donc confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
 
 # Annexe
 ```{r}
