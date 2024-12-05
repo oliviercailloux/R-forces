@@ -14,14 +14,9 @@ header-includes:
 ---
 
 # Contexte
-Commission d’enquête de l’AN
-la situation, les missions et les moyens des forces de sécurité
-22 mai au 28 juin 2019
-agents de la police nationale et des polices municipales, aux militaires de la gendarmerie nationale et aux réservistes
+L’assemblée nationale a constitué en 2019 une commission d’enquête concernant « la situation, les missions et les moyens des forces de sécurité ». À cette occasion, elle a interrogé par écrit des agents de la police nationale et des polices municipales, militaires de la gendarmerie nationale et réservistes. Les réponses ont été [publiées](https://data.assemblee-nationale.fr/autres/consultations-citoyennes/moyens-des-forces-de-securite) sur le site de l’assemblée nationale, après anonymisation. 
 
-"les éléments des réponses permettant d’identifier le répondant (coordonnées ou risque de ré-identification) ainsi que les réponses comprenant des imputations personnelles ou des insultes ont été supprimés."
-
-https://data.assemblee-nationale.fr/autres/consultations-citoyennes/moyens-des-forces-de-securite
+La France a été épinglée ces dernières années à plusieurs reprises par des organisations internationales pour des faits préoccupants de violences policières. Il nous a semblé intéressant dans ce contexte d’examiner si un lien peut être établi entre les conditions socio-économiques des départements d’exercice des forces de sécurité et les réponses données par ces dernières concernant une volonté de répression plus ou moins accrue. (Nous n’avons bien sûr pas de prétention d’apporter de grandes réponses dans le cadre de cet exercice limité de statistique, et encore moins concernant un quelconque établissement de lien de causalité, mais ces données nous ont semblé mériter investigation.)
 
 Nous utilisons également les « Principaux indicateurs sur les revenus et la pauvreté aux niveaux national et local en 2019 » du dispositif Fichier localisé social et fiscal (Filosofi) publié par l’INSEE (présentation [ici](https://www.insee.fr/fr/statistiques/6436484), téléchargement [ici](https://www.insee.fr/fr/statistiques/6036902)). Des données plus récentes [existent](https://www.insee.fr/fr/statistiques/7752770) mais nous utilisons les données reflétant la réalité au moment des réponses des forces de sécurité.
 
