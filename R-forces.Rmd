@@ -188,7 +188,7 @@ rpe2 <- 0.1
 prints <- paste0(
   "Avec un risque de première espèce à ", rpes * 100,
   " %, on a $P(Z ∈ W) = ", rpes,
-  " pour \\overline{W} ≈ [", qnorm(rpes / 2) |> round(2), ", ", qnorm(1 - rpes / 2) |> round(2), "]$."
+  "$ pour $\\overline{W} ≈ [", qnorm(rpes / 2) |> round(2), ", ", qnorm(1 - rpes / 2) |> round(2), "]$."
 )
 ```
 - `r prints[1]`
@@ -197,12 +197,12 @@ prints <- paste0(
 ```{r}
 z <- (indicators_by_type$mu[1] - indicators_by_type$mu[2]) / +
   sqrt(
-    indicators_by_type[["s’"]][1]^2 / indicators_by_type$n[1] + indicators_by_type[["s’"]][2]^2 / +
-      indicators_by_type$n[2]
+    indicators_by_type[["s’"]][1]^2 / indicators_by_type$n[1] +
+      indicators_by_type[["s’"]][2]^2 / indicators_by_type$n[2]
   )
 ```
 
-Nous observons $z = `r z |> round(2)`$ et rejettons donc allègrement $H_0$ : les deux moyennes semblent différentes (à un degré de confiance très élevé, p-value de `r (2 * pnorm(-abs(z))) |> format(digits = 2)`).
+Nous observons $z = `r z |> round(2)` \in W$ et rejettons donc allègrement $H_0$ : les deux moyennes semblent différentes (à un degré de confiance très élevé, p-value de `r (2 * pnorm(-abs(z))) |> format(digits = 2)`).
 
 Voyons ce qu’en pense le test de Welsh de R.
 ```{r}
