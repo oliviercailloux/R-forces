@@ -4,8 +4,10 @@ author:
   - "Méziane Cherif"
   - "Olivier Cailloux"
 output: pdf_document
+urlcolor: blue
 header-includes:
   - \usepackage{newunicodechar}
+  - \newunicodechar{α}{\alpha}
   - \newunicodechar{μ}{\mu}
   - \newunicodechar{σ}{\sigma}
   - \newunicodechar{χ}{\chi}
@@ -16,7 +18,9 @@ header-includes:
 # Contexte
 L’assemblée nationale a constitué en 2019 une commission d’enquête concernant « la situation, les missions et les moyens des forces de sécurité ». À cette occasion, elle a interrogé par écrit des agents de la police nationale et des polices municipales, militaires de la gendarmerie nationale et réservistes. Les réponses ont été [publiées](https://data.assemblee-nationale.fr/autres/consultations-citoyennes/moyens-des-forces-de-securite) sur le site de l’assemblée nationale, après anonymisation. 
 
-La France a été épinglée ces dernières années à plusieurs reprises par des organisations internationales pour des faits préoccupants de violences policières. Il nous a semblé intéressant dans ce contexte d’examiner si un lien peut être établi entre les conditions socio-économiques des départements d’exercice des forces de sécurité et les réponses données par ces dernières concernant une volonté de répression plus ou moins accrue. (Nous n’avons bien sûr pas de prétention d’apporter de grandes réponses dans le cadre de cet exercice limité de statistique, et encore moins concernant un quelconque établissement de lien de causalité, mais ces données nous ont semblé mériter investigation.)
+La France a été épinglée ces dernières années à plusieurs reprises par des organisations internationales pour des faits préoccupants de violences policières. Il nous a semblé intéressant dans ce contexte d’examiner si un lien peut être établi entre les conditions socio-économiques des départements d’exercice des forces de sécurité et certaines réponses données par ces dernières. 
+Plus précisément, nous nous intéressons principalement à une variable qui encode la réponse à la question : « A partir de quel âge selon vous, un mineur devrait, selon vous, être traité comme un majeur par la justice ? » (voir questionnaire sur le site mentionné).
+(Nous n’avons bien sûr pas de prétention d’apporter de grandes réponses dans le cadre de cet exercice limité de statistique, ou d’affirmer rigoureusement un lien quelconque entre la réponse à cette seule question et une volonté de répression, et encore moins concernant un quelconque établissement de lien de causalité, mais ces données nous ont semblé mériter un traitement qui pourrait constituer un morceau d’une investigation plus rigoureuse.) 
 
 Nous utilisons également les « Principaux indicateurs sur les revenus et la pauvreté aux niveaux national et local en 2019 » du dispositif Fichier localisé social et fiscal (Filosofi) publié par l’INSEE (présentation [ici](https://www.insee.fr/fr/statistiques/6436484), téléchargement [ici](https://www.insee.fr/fr/statistiques/6036902)). Des données plus récentes [existent](https://www.insee.fr/fr/statistiques/7752770) mais nous utilisons les données reflétant la réalité au moment des réponses des forces de sécurité.
 
@@ -26,6 +30,7 @@ Chargeons quelques packages utiles.
 library(conflicted)
 conflicts_prefer(dplyr::filter)
 library(tidyverse)
+library(xlsx)
 ```
 
 Téléchargeons les réponses des forces de sécurité, ou vérifions leur conformité si elles sont déjà présentes à l’aide du hash MD5 indiqué sur le site sus-mentionné.
@@ -133,24 +138,119 @@ data
 write_csv(data, "Données fusionnées.csv", na = "")
 ```
 
-# Idées (brouillon)
-Nous pourrions analyser le lien entre la pauvreté du lieu d’exercice et l’âge souhaité des mineurs (surtout pauvreté des plus jeunes) ; le manque d’effectif ; le temps de formation ; le nombre de jours supplémentaires impayés et le manque d’effectif ; l’appréciation de la mobilité ; la volonté d’un cadre plus sûr ; la forfaitisation de sanctions…
-
 # Sélection
-Considérons le taux de pauvreté dans leur département et l’âge souhaité pour traitement comme un majeur. On ne retient en outre que les enregistrements où ces variables sont toutes renseignées.
+Les données ainsi obtenues sont très riches, mais pour ne pas noyer le lecteur (et respecter les consignes), nous en nous concentrons sur quatre variables : le type de répondant, le département d’exercice, le taux de pauvreté dans le département d’exercice et l’âge souhaité pour traitement comme un majeur. On ne retient en outre que les enregistrements où ces variables sont toutes renseignées.
 
 ```{r}
 subset <- data |>
-  select("you", "TP6019", "agemaj") |>
+  select("you", "dept", "TP6019", "agemaj") |>
   drop_na()
+write.xlsx(subset, "Sélection.xlsx")
 ```
 
-# Comparaison de sous-groupes
-Les nombres de réponses par types de répondants diffèrent beaucoup. Considérons les deux types de répondants avec le plus de réponses.
+# Description
+Chaque entrée dans notre base de données (l’unité statistique) est un agent répondant. Décrivons maintenant un peu plus en détail les variables retenues.
+
+## Type de répondant
+Le type de répondant est une variable catégorielle qui décrit le corps dans lequel se situe le répondant.
 ```{r}
 subset |> ggplot(aes(x = you)) +
-  geom_bar() +
+  geom_bar(fill = "darkred", color = "black") +
+  labs(x = "Type de répondant", y = "Nombre de réponses", title = "Types de répondant") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Taux de pauvreté
+Le taux de pauvreté dans le département d’exercice est un nombre entre zéro et cent (en principe), à interpréter comme un pourcentage. On observe qu’il se situe, pour l’année concernée, entre `r min(subset$TP6019)` et `r max(subset$TP6019)`.
+```{r}
+povs <- subset |> pull(TP6019)
+subset |> ggplot(aes(x = povs)) +
+  geom_histogram(binwidth = 1, fill = "lightgreen", color = "black") +
+  labs(
+    x = "Taux de pauvreté (%)", y = "Nombre de réponses",
+    title = "Taux de pauvreté dans le département d'exercice"
+  )
+subset |> ggplot(aes(x = cut(povs, breaks = seq(0, 100, 10)))) +
+  geom_bar(fill = "lightgreen", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Taux de pauvreté (%)", y = "Nombre de réponses",
+    title = "Taux de pauvretés dans le département d'exercice, par classe"
+  )
+table(cut(povs, breaks = seq(0, 100, 10))) |> round(2)
+```
+
+On voit sur le plot quelques départements subsissant un taux de pauvreté particulièrement important. La liste ci-dessous indique les dix départements avec les plus hauts taux de pauvreté.
+```{r}
+subset |>
+  select("dept", "TP6019") |>
+  unique() |>
+  arrange(desc(TP6019)) |>
+  head(10)
+```
+
+## Âge souhaité pour traitement comme un majeur
+L’âge souhaité pour traitement comme un majeur est un nombre entier. On observe qu’il se situe, dans nos réponses, entre `r min(subset$agemaj)` et `r max(subset$agemaj)` ans.
+```{r}
+ages <- subset |> pull(agemaj)
+subset |> ggplot(aes(x = ages)) +
+  geom_histogram(binwidth = 1, fill = "darkgreen", color = "black") +
+  labs(
+    x = "Âge souhaité pour traitement comme un majeur (ans)", y = "Nombre de réponses",
+    title = "Âges souhaités pour traitement comme un majeur"
+  )
+subset |> ggplot(aes(x = cut(ages, breaks = seq(8, 20, 2)))) +
+  geom_bar(fill = "darkgreen", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Âge souhaité pour traitement comme un majeur (ans)", y = "Nombre de réponses",
+    title = "Âges souhaités pour traitement comme un majeur, par classe"
+  )
+table(cut(ages, breaks = seq(8, 20, 2))) |> round(2)
+```
+
+# Moyenne de l’âge souhaité pour traitement comme un majeur
+Supposons les observations concernant l’âge souhaité pour traitement comme un majeur comme des réalisations indépendantes et identiquement distribuées d’une variable aléatoire $X$ de moyenne $\mu$ et d’écart-type $\sigma$.
+Nous pouvons approximer $X$ par une loi normale, vu le nombre de nos observations.
+
+Nous pouvons estimer ponctuellement $\mu$ simplement en calculant la moyenne empirique : $\overline{X} = \frac{1}{n} \sum_{i=1}^n X_i$, ici, `r mean(ages) |> round(2)` ans.
+
+Pour obtenir un intervalle de confiance, utilisons la variance empirique corrigée, $S'^2 = \frac{1}{n - 1} \sum_{i=1}^n (X_i - \overline{X})^2$, donc $Q = \frac{(n - 1) S'^2}{σ^2} \sim χ^2_{n - 1}$. 
+Avec $\frac{\sqrt{n}}{\sigma} \overline{X} - μ \sim \mathcal{N}(0, 1)$,
+on obtient $\frac{\sqrt{n}}{\sigma} \frac{\overline{X} - μ}{\sqrt{Q / (n - 1)}} = \sqrt{n} \frac{\overline{X} - μ}{S'} \sim t_{n - 1}$,
+donc un intervalle de confiance pour $\mu$ à $1 - α$ % (risque de première espèce (RPE) $α$) est donné par 
+$\overline{X} \pm t_{n - 1, 1 - \frac{\alpha}{2}} \frac{S'}{\sqrt{n}}$.
+On peut également l’obtenir directement via la fonction `t.test` de R.
+```{r}
+n <- length(ages)
+mu <- mean(ages)
+s <- sd(ages)
+conf_10 <- mu + c(-1, +1) * qt(1 - 0.1 / 2, n - 1) * s / sqrt(n)
+conf_5 <- mu + c(-1, +1) * qt(1 - 0.05 / 2, n - 1) * s / sqrt(n)
+conf_10_r <- t.test(ages, conf.level = 0.9)$conf.int
+conf_5_r <- t.test(ages, conf.level = 0.95)$conf.int
+stopifnot(abs(conf_10[1] - conf_10_r[1]) < 1e-10)
+stopifnot(abs(conf_10[2] - conf_10_r[2]) < 1e-10)
+stopifnot(abs(conf_5[1] - conf_5_r[1]) < 1e-10)
+stopifnot(abs(conf_5[2] - conf_5_r[2]) < 1e-10)
+```
+
+Nous obtenons l’intervalle de RPE 10 % [`r conf_10[1] |> format(digits = 4, nsmall = 2)`, `r conf_10[2] |> format(digits = 4, nsmall = 2)`] et l’intervalle de RPE 5 % [`r conf_5[1] |> format(digits = 4, nsmall = 2)`, `r conf_5[2] |> format(digits = 4, nsmall = 2)`].
+
+On peut affirmer avec une bonne confiance que l’âge moyen souhaité pour traitement comme un majeur ne s’écarte que très peu de 14 ans et demi.
+
+# Test de moyenne
+Testons plus précisément si l’âge souhaité pour traitement comme un majeur est au moins de 15 ans.
+Définissons notre hypothèse nulle $H_0$ comme l’égalité de la moyenne de l’âge souhaité pour traitement comme un majeur à 15 ans.
+Le raisonnement étant ici une variante assez proche de ceux de la section précédente et de la section suivante, nous appliquons simplement le test implémenté par R et sautons les détails.
+```{r}
+t.test(ages, mu = 15, alternative = "less")
+```
+Nous rejetons donc l’hypothèse nulle à un risque de première espèce de 5 % (et a fortiori, de 10 %) : l’âge souhaité pour traitement comme un majeur est statistiquement significativement inférieur à 15 ans. Ceci pouvait également être conclu de l’intervalle obtenu à la section précédente, qui n’atteignait pas 15 ans. La confiance dans ce rejet est très forte, comme l’indique la p-value rapportée par le test ci-dessus : l’hypothèse reste rejetée à un RPE extrêmement proche de zéro.
+
+# Comparaison de sous-groupes
+Les nombres de réponses par types de répondants diffèrent beaucoup (cf. plot en section [Type de répondant](#type-de-répondant)). Considérons les deux types de répondants avec le plus de réponses.
+```{r}
 highest_answers_type <- subset |>
   select("you") |>
   group_by(you) |>
@@ -220,20 +320,23 @@ Voyons si le taux de pauvreté dans le département est indépendant de l’âge
 
 Coupons d’abord les deux séries d’observations en classes d’effectifs proches.
 ```{r}
-povs <- subset |> pull(TP6019)
-subset |> ggplot(aes(x = povs)) +
-  geom_histogram(binwidth = 1)
-subset |> ggplot(aes(x = agemaj)) +
-  geom_histogram(binwidth = 1)
 povs_bins <- cut_number(povs, n = 10)
 subset |> ggplot(aes(x = povs_bins)) +
-  geom_bar() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  geom_bar(fill = "lightgreen", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Taux de pauvreté (%)", y = "Nombre de réponses",
+    title = "Taux de pauvretés dans le dptm d'exercice, par classes d'effectifs proches"
+  )
 ages <- subset |> pull(agemaj)
 ages_bins <- cut_number(ages, n = 4)
 subset |> ggplot(aes(x = ages_bins)) +
-  geom_bar() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  geom_bar(fill = "darkgreen", color = "black") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Âge souhaité pour traitement comme un majeur (ans)", y = "Nombre de réponses",
+    title = "Âges pour traitement comme un majeur, par classes d'effectifs proches"
+  )
 ```
 
 Tableau de contingence empirique.
@@ -260,4 +363,6 @@ La probabilité qu’une $χ^2$ à `r ct$parameter` degrés de liberté soit aus
 stopifnot(ct$p.value - (1 - pchisq(unname(ct$statistic), ct$parameter)) < 1e-10)
 ct$p.value |> format(digits = 2)
 ```
-On peut donc confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
+On peut donc très confortablement rejeter l’hypothèse d’indépendance entre le taux de pauvreté et l’âge souhaité pour traitement comme un majeur. Ceci implique également, a fortiori, le rejet de l’hypothèse aux seuils de 10 % et 5 %.
+
+Pour aller plus loin, il serait raisonnable d’évaluer un modèle de régression pour tester notre intuition a priori que l’âge souhaité pour traitement comme un majeur diminue lorsque le département d’exercice a un taux de pauvreté plus élevé (pour satisfaire la curiosité du lecteur nous indiquons qu’une telle régression, que nous avons tentée avec R, semble confirmer notre intuition, toutefois avec un coefficient de corrélation faible, mais ceci sort du cadre de ce document).
