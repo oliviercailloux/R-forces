@@ -220,6 +220,7 @@ Avec $\frac{\sqrt{n}}{\sigma} \overline{X} - μ \sim \mathcal{N}(0, 1)$,
 on obtient $\frac{\sqrt{n}}{\sigma} \frac{\overline{X} - μ}{\sqrt{Q / (n - 1)}} = \sqrt{n} \frac{\overline{X} - μ}{S'} \sim t_{n - 1}$,
 donc un intervalle de confiance pour $\mu$ à $1 - α$ % (risque de première espèce (RPE) $α$) est donné par 
 $\overline{X} \pm t_{n - 1, 1 - \frac{\alpha}{2}} \frac{S'}{\sqrt{n}}$.
+(Bien sûr on aurait pu se passer de la variance empirique corrigée et utiliser une approximation normale plutôt qu’une loi de Student, vu la taille de notre échantillon la différence aurait été totalement négligeable, mais comme c’est l’ordinateur qui fait les calculs, nous avons adopté l’approche la plus précise.)
 On peut également l’obtenir directement via la fonction `t.test` de R.
 ```{r}
 n <- length(ages)
