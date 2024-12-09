@@ -15,6 +15,17 @@ header-includes:
   - \newunicodechar{≈}{\approx}
 ---
 
+# Déclaration
+Nous déclarons sur l'honneur que ce mémoire a été écrit de notre main, sans aide extérieure non autorisée, qu'il n'a pas été présenté auparavant pour évaluation et qu'il n'a jamais été publié, dans sa totalité ou en partie.
+
+Toutes parties, groupes de mots ou idées, aussi limités soient-ils, y compris des tableaux, graphiques, cartes etc. qui sont empruntés ou qui font référence à d'autres sources bibliographiques sont présentés comme tels, sans exception aucune.
+
+ 
+
+ 
+
+ 
+
 # Contexte
 L’assemblée nationale a constitué en 2019 une commission d’enquête concernant « la situation, les missions et les moyens des forces de sécurité ». À cette occasion, elle a interrogé par écrit des agents de la police nationale et des polices municipales, militaires de la gendarmerie nationale et réservistes. Les réponses ont été [publiées](https://data.assemblee-nationale.fr/autres/consultations-citoyennes/moyens-des-forces-de-securite) sur le site de l’assemblée nationale, après anonymisation. 
 
